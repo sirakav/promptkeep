@@ -1,0 +1,41 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main # Trigger deployment on pushes to the main branch
+
+permissions:
+  contents: read # Needed to checkout the repository
+  pages: write    # Needed to deploy to GitHub Pages
+  id-token: write # Needed for OIDC token if using actions/deploy-pages
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Or your preferred Node.js LTS version
+          cache: 'npm' # Enable caching for npm dependencies
+
+      - name: Install dependencies
+        run: npm ci # Use ci for cleaner installs in CI environments
+
+      - name: Build Next.js application
+        run: npm run build # This will use the 'export' output due to next.config.ts
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3 # Changed from peaceiris/actions-gh-pages
+        with:
+          path: ./out # Default output directory for Next.js static export
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 # Official GitHub action for deployment
+        # This action will automatically use the artifact uploaded by actions/upload-pages-artifact
+        # and deploy to the gh-pages branch by default, or to the environment configured in repo settings.
