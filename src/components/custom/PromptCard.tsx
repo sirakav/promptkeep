@@ -1,5 +1,5 @@
 import { Prompt, Category } from '@/types';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Copy, Edit3, Trash2, MoreVertical } from 'lucide-react';
@@ -34,33 +34,33 @@ export const PromptCard = ({ prompt, category, onCopy, onEdit, onDelete }: Promp
             {category && <CardDescription>{category.name}</CardDescription>}
             {!category && prompt.categoryId && <CardDescription>Category ID: {prompt.categoryId}</CardDescription>}
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-              <Button variant="ghost" size="icon">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(); }}>
-                <Edit3 className="mr-2 h-4 w-4" />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete(); }} className="text-red-500 hover:text-red-500 focus:text-red-500">
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center">
+            <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleCopy(); }} aria-label="Copy prompt">
+              <Copy className="h-4 w-4" />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(); }}>
+                  <Edit3 className="mr-2 h-4 w-4" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete(); }} className="text-red-500 hover:text-red-500 focus:text-red-500">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-wrap">{prompt.content}</p>
       </CardContent>
-      <CardFooter className="flex justify-start items-center pt-4">
-        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleCopy(); }} aria-label="Copy prompt">
-          <Copy className="h-4 w-4" />
-        </Button>
-      </CardFooter>
     </Card>
   );
 };
