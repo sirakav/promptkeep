@@ -103,3 +103,61 @@ export const getCategoryByName = (name: string): Category | undefined => {
 //   });
 //   savePrompts(prompts);
 // };
+
+export const exportData = (): string => {
+  const prompts = getPrompts();
+  const categories = getCategories();
+  const data = {
+    prompts,
+    categories,
+    exportedAt: new Date().toISOString(),
+  };
+  return JSON.stringify(data, null, 2);
+};
+
+export const importData = (jsonData: string): { success: boolean; message: string; error?: string } => {
+  try {
+    let parsedData;
+    try {
+      parsedData = JSON.parse(jsonData);
+    } catch (e) {
+      return { success: false, message: "Invalid JSON format.", error: "parse_error" };
+    }
+
+    if (typeof parsedData !== 'object' || parsedData === null) {
+      return { success: false, message: "Invalid data format: not an object.", error: "structure_error" };
+    }
+
+    if (!Array.isArray(parsedData.prompts)) {
+      return { success: false, message: "Invalid data format: 'prompts' is not an array.", error: "structure_error" };
+    }
+
+    if (!Array.isArray(parsedData.categories)) {
+      return { success: false, message: "Invalid data format: 'categories' is not an array.", error: "structure_error" };
+    }
+
+    // Optional: Basic structural validation for a few items
+    if (parsedData.prompts.length > 0) {
+      const firstPrompt = parsedData.prompts[0];
+      if (typeof firstPrompt.id !== 'string' || typeof firstPrompt.name !== 'string' || typeof firstPrompt.content !== 'string') {
+        return { success: false, message: "Invalid prompt structure in 'prompts' array.", error: "structure_error" };
+      }
+    }
+
+    if (parsedData.categories.length > 0) {
+      const firstCategory = parsedData.categories[0];
+      if (typeof firstCategory.id !== 'string' || typeof firstCategory.name !== 'string') {
+        return { success: false, message: "Invalid category structure in 'categories' array.", error: "structure_error" };
+      }
+    }
+
+    savePrompts(parsedData.prompts as Prompt[]);
+    saveCategories(parsedData.categories as Category[]);
+
+    return { success: true, message: "Data imported successfully!" };
+
+  } catch (error) {
+    console.error("Unexpected error during import:", error);
+    return { success: false, message: "An unexpected error occurred during import.", error: "unexpected_error" };
+  }
+};

@@ -11,6 +11,9 @@ import { ConfirmationDialog } from '@/components/custom/ConfirmationDialog';
 import { SearchBar } from '@/components/custom/SearchBar';
 import { CategoryFilter } from '@/components/custom/CategoryFilter';
 import { PlusCircle } from 'lucide-react';
+import { OnboardingModal } from '@/components/custom/OnboardingModal'; // Import OnboardingModal
+
+const ONBOARDING_COMPLETED_KEY = 'promptkeep_onboarding_completed'; // Define localStorage key
 
 export default function HomePage() {
   // State for prompts and categories
@@ -24,12 +27,24 @@ export default function HomePage() {
   const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(false);
   const [promptToDeleteId, setPromptToDeleteId] = useState<string | null>(null);
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false); // State for onboarding modal
 
-  // Load initial data from localStorage
+  // Load initial data from localStorage and check onboarding status
   useEffect(() => {
     setPrompts(ls.getPrompts());
     setCategories(ls.getCategories());
+
+    const onboardingCompleted = localStorage.getItem(ONBOARDING_COMPLETED_KEY);
+    if (!onboardingCompleted) {
+      setShowOnboardingModal(true);
+    }
   }, []);
+
+  // --- Onboarding Modal Handler ---
+  const handleCloseOnboarding = () => {
+    localStorage.setItem(ONBOARDING_COMPLETED_KEY, 'true');
+    setShowOnboardingModal(false);
+  };
 
   // --- CRUD Operations and Handlers ---
 
@@ -208,6 +223,10 @@ export default function HomePage() {
         description="This action cannot be undone. This will permanently delete the prompt."
         confirmText="Delete"
         // cancelText="Keep Prompt" // Example of customizing text
+      />
+      <OnboardingModal
+        isOpen={showOnboardingModal}
+        onClose={handleCloseOnboarding}
       />
     </div>
   );
