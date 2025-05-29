@@ -17,10 +17,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark"> {/* Added dark class for default theme */}
+    <html lang="en" className="dark">
       <body className={inter.className}>
-        <Navbar /> {/* Add Navbar here */}
-        <main className="container mx-auto px-4 py-8"> {/* Add a main wrapper */}
+        <Navbar />
+        <main className="container mx-auto px-4 py-8">
           {children}
         </main>
         <Toaster />
