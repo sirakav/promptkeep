@@ -26,7 +26,7 @@ export const PromptCard = ({ prompt, category, onCopy, onEdit, onDelete }: Promp
   };
 
   return (
-    <Card>
+    <Card onClick={handleCopy} className="cursor-pointer">
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
@@ -35,17 +35,17 @@ export const PromptCard = ({ prompt, category, onCopy, onEdit, onDelete }: Promp
             {!category && prompt.categoryId && <CardDescription>Category ID: {prompt.categoryId}</CardDescription>}
           </div>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
               <Button variant="ghost" size="icon">
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleEdit}>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(); }}>
                 <Edit3 className="mr-2 h-4 w-4" />
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleDelete} className="text-red-500 hover:text-red-500 focus:text-red-500">
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete(); }} className="text-red-500 hover:text-red-500 focus:text-red-500">
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete
               </DropdownMenuItem>
@@ -56,10 +56,9 @@ export const PromptCard = ({ prompt, category, onCopy, onEdit, onDelete }: Promp
       <CardContent>
         <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-wrap">{prompt.content}</p>
       </CardContent>
-      <CardFooter>
-        <Button variant="outline" size="sm" onClick={handleCopy} className="w-full">
-          <Copy className="mr-2 h-4 w-4" />
-          Copy Prompt
+      <CardFooter className="flex justify-start items-center pt-4">
+        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleCopy(); }} aria-label="Copy prompt">
+          <Copy className="h-4 w-4" />
         </Button>
       </CardFooter>
     </Card>

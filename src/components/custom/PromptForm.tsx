@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Prompt, Category } from '@/types';
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogClose, // For an explicit close button
-} from '@/components/ui/dialog';
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetClose, // For an explicit close button
+} from '@/components/ui/sheet'; // Updated import path
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -64,14 +64,14 @@ export const PromptForm = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[525px]">
-        <DialogHeader>
-          <DialogTitle>{initialData ? 'Edit Prompt' : 'Create New Prompt'}</DialogTitle>
-          <DialogDescription>
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent side="right" className="w-[400px] sm:w-[540px] p-6 overflow-y-auto"> {/* Added overflow-y-auto for scrollability */}
+        <SheetHeader>
+          <SheetTitle>{initialData ? 'Edit Prompt' : 'Create New Prompt'}</SheetTitle>
+          <SheetDescription>
             {initialData ? 'Update the details of your prompt.' : 'Fill in the details for your new prompt.'}
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -113,21 +113,20 @@ export const PromptForm = ({
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 className="col-span-3"
-                rows={6}
                 required
               />
             </div>
           </div>
-          <DialogFooter>
-            <DialogClose asChild>
+          <SheetFooter>
+            <SheetClose asChild>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-            </DialogClose>
+            </SheetClose>
             <Button type="submit">{initialData ? 'Save Changes' : 'Create Prompt'}</Button>
-          </DialogFooter>
+          </SheetFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 };
