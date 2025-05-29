@@ -18,7 +18,7 @@ interface OnboardingModalProps {
 export const OnboardingModal = ({ isOpen, onClose }: OnboardingModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <Rocket className="mr-2 h-6 w-6 text-primary" />
@@ -59,7 +59,6 @@ export const OnboardingModal = ({ isOpen, onClose }: OnboardingModalProps) => {
           <div>
             <h3 className="font-semibold text-lg flex items-center mb-2">
               <FileUp className="mr-2 h-5 w-5 text-purple-500" />
-              <FileDown className="mr-2 h-5 w-5 text-purple-500" />
               Import & Export Your Data
             </h3>
             <p className="text-sm text-muted-foreground pl-7">

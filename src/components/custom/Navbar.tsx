@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -7,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { UserCircle } from 'lucide-react';
-import { exportData, importData } from '../../lib/localStorage'; // importData added
+import { exportData, importData } from '../../lib/localStorage';
 import { toast } from 'sonner';
 import { ImportDataDialog } from './ImportDataDialog';
 
@@ -33,8 +34,6 @@ export const Navbar = () => {
     }
   };
 
-  };
-
   const handleImportData = (jsonData: string) => {
     const result = importData(jsonData);
     if (result.success) {
@@ -47,35 +46,37 @@ export const Navbar = () => {
   };
 
   return (
-    <header className="bg-background border-b">
-      <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <div className="text-2xl font-bold text-primary">
-          PromptKeep
-        </div>
-        {/* Navigation links or other elements can be added here later */}
-        <div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <UserCircle className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleExport}>
-                Export Data
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsImportDialogOpen(true)}> {/* Updated onClick */}
-                Import Data
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </nav>
+    <>
+      <header className="bg-background border-b">
+        <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="text-2xl font-bold text-primary">
+            PromptKeep
+          </div>
+          {/* Navigation links or other elements can be added here later */}
+          <div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <UserCircle className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleExport}>
+                  Export Data
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsImportDialogOpen(true)}>
+                  Import Data
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </nav>
+      </header>
       <ImportDataDialog
         isOpen={isImportDialogOpen}
         onClose={() => setIsImportDialogOpen(false)}
-        onImport={handleImportData} // Updated onImport prop
+        onImport={handleImportData}
       />
-    </header>
+    </>
   );
 };
