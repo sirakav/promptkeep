@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Prompt, Category } from '@/types';
 import { Button } from '@/components/ui/button';
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetClose, // For an explicit close button
-} from '@/components/ui/sheet'; // Updated import path
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from '@/components/ui/dialog'; // Updated import path
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -64,38 +64,38 @@ export const PromptForm = ({
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-[400px] sm:w-[540px] p-6 overflow-y-auto"> {/* Added overflow-y-auto for scrollability */}
-        <SheetHeader>
-          <SheetTitle>{initialData ? 'Edit Prompt' : 'Create New Prompt'}</SheetTitle>
-          <SheetDescription>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="w-[50vw] p-6 max-h-[90vh] h-full overflow-y-auto flex flex-col">
+        <DialogHeader>
+          <DialogTitle>{initialData ? 'Edit Prompt' : 'Create New Prompt'}</DialogTitle>
+          <DialogDescription>
             {initialData ? 'Update the details of your prompt.' : 'Fill in the details for your new prompt.'}
-          </SheetDescription>
-        </SheetHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="flex flex-col flex-grow">
+          <div className="py-4 flex-grow flex flex-col gap-4">
+            {/* Name Field */}
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="name" className="text-sm">
                 Name
               </Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="col-span-3"
                 required
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="category" className="text-right">
+
+            {/* Category Field */}
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="category" className="text-sm">
                 Category
               </Label>
-              {/* Basic input for now, will be enhanced with datalist/combobox */}
               <Input
                 id="category"
                 value={categoryName}
                 onChange={(e) => setCategoryName(e.target.value)}
-                className="col-span-3"
                 placeholder="Enter new or existing category"
                 required
                 // list="category-suggestions" // Future enhancement
@@ -104,29 +104,31 @@ export const PromptForm = ({
                 {categories.map(cat => <option key={cat.id} value={cat.name} />)}
               </datalist> */}
             </div>
-            <div className="grid grid-cols-4 items-start gap-4"> {/* items-start for textarea */}
-              <Label htmlFor="content" className="text-right pt-1"> {/* Adjust alignment */}
+
+            {/* Content Field */}
+            <div className="flex flex-col gap-1 flex-grow">
+              <Label htmlFor="content" className="text-sm">
                 Content
               </Label>
               <Textarea
                 id="content"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="col-span-3"
+                className="resize-none flex-grow"
                 required
               />
             </div>
           </div>
-          <SheetFooter>
-            <SheetClose asChild>
+          <DialogFooter>
+            <DialogClose asChild>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-            </SheetClose>
+            </DialogClose>
             <Button type="submit">{initialData ? 'Save Changes' : 'Create Prompt'}</Button>
-          </SheetFooter>
+          </DialogFooter>
         </form>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 };
