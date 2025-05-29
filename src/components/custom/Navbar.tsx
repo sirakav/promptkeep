@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,7 +33,7 @@ export const Navbar = () => {
       toast.error("Export Failed", { description: "Could not export your data." });
     }
   };
-  };
+
   const handleImportData = (jsonData: string) => {
     const result = importData(jsonData);
     if (result.success) {

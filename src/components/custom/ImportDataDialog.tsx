@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, ChangeEvent } from 'react';
 import {
   Dialog,
@@ -64,7 +66,7 @@ export const ImportDataDialog = ({ isOpen, onClose, onImport }: ImportDataDialog
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="w-2xl">
         <DialogHeader>
           <DialogTitle>Import Data</DialogTitle>
           <DialogDescription>
