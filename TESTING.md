@@ -292,3 +292,34 @@ npm test --watch
 ```
 
 This provides a basic framework. You may need to adjust configurations based on your specific project setup and Next.js version.
+
+## End-to-End (E2E) and Component Testing with Playwright
+
+We use Playwright for E2E tests and for testing complex UI components, particularly those built with libraries like Radix UI, which can be challenging to test accurately in a JSDOM environment (as used by Jest/RTL).
+
+Playwright tests run in real browsers and can interact with your application as a user would. This allows for more realistic and reliable testing of UI interactions and end-to-end user flows.
+
+### Test Location
+Playwright tests are located in the `e2e/` directory at the root of the project. Each test file typically has a `.pw.tsx` or `.pw.ts` extension.
+
+### Running Playwright Tests
+To run these tests, use the following command:
+
+```bash
+npm run test:e2e
+```
+
+Or if you are using Yarn:
+
+```bash
+yarn test:e2e
+```
+
+### Development Server Requirement
+Playwright tests often require a development server of your application to be running so that Playwright can navigate to its pages. Ensure your development server is active before running the tests:
+
+```bash
+npm run dev
+```
+
+(Note: The Playwright configuration in `playwright.config.ts` can be set up to start the development server automatically using the `webServer` option, which is recommended for CI environments.)

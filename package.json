@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:e2e": "npx playwright test"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -64,6 +65,7 @@
     "@babel/preset-react": "^7.27.1",
     "@babel/preset-typescript": "^7.27.1",
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.52.0",
     "@swc/core": "^1.11.29",
     "@swc/jest": "^0.2.38",
     "@tailwindcss/postcss": "^4",

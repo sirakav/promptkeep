@@ -53,3 +53,9 @@ jobs:
 
       - name: Run Tests
         run: ${{ steps.detect-package-manager.outputs.test_runner }}
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright E2E Tests
+        run: ${{ steps.detect-package-manager.outputs.manager }} run test:e2e
