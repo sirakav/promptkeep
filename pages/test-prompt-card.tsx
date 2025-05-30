@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { PromptCard } from '@/components/custom/PromptCard';
 import { Prompt, Category } from '@/types'; // Adjust path as necessary
-import { Button } from '@/components/ui/button'; // For potential actions on test page
 
 // Expose functions/variables to Playwright via window
 declare global {
