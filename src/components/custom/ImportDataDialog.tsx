@@ -23,12 +23,12 @@ interface ImportDataDialogProps {
 
 export const ImportDataDialog = ({ isOpen, onClose, onImport }: ImportDataDialogProps) => {
   const [jsonText, setJsonText] = useState<string>("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  // const [selectedFile, setSelectedFile] = useState<File | null>(null); // Removed unused state
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setSelectedFile(file);
+      // setSelectedFile(file); // Removed
       const reader = new FileReader();
       reader.onload = (e) => {
         const content = e.target?.result as string;
@@ -36,7 +36,7 @@ export const ImportDataDialog = ({ isOpen, onClose, onImport }: ImportDataDialog
       };
       reader.readAsText(file);
     } else {
-      setSelectedFile(null);
+      // setSelectedFile(null); // Removed
       // If a file was previously selected and then cleared, also clear jsonText
       // only if it was populated from a file.
       // For simplicity, we can clear it or decide if jsonText should persist

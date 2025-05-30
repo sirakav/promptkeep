@@ -1,7 +1,7 @@
 import { Prompt, Category } from '../types';
 
-const PROMPTS_KEY = 'promptkeep_prompts';
-const CATEGORIES_KEY = 'promptkeep_categories';
+const PROMPTS_KEY = 'prompts';
+const CATEGORIES_KEY = 'categories';
 
 // Helper function to safely access localStorage
 const getLocalStorageItem = (key: string): string | null => {
@@ -27,26 +27,44 @@ export const savePrompts = (prompts: Prompt[]): void => {
   setLocalStorageItem(PROMPTS_KEY, JSON.stringify(prompts));
 };
 
-export const addPrompt = (prompt: Prompt): void => {
+export const addPrompt = (promptData: Omit<Prompt, 'id' | 'createdAt' | 'updatedAt'>): Prompt => {
   const prompts = getPrompts();
-  // Ensure no duplicate ID, though UUIDs make this unlikely
-  if (prompts.find(p => p.id === prompt.id)) {
-    console.warn(`Prompt with ID ${prompt.id} already exists. Skipping add.`);
-    return;
+  const newPrompt: Prompt = {
+    ...promptData,
+    id: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  // It's good practice to check for ID collisions, however unlikely with UUIDs.
+  // A more robust solution might involve retrying with a new UUID if a collision is detected.
+  let idToCheck = newPrompt.id;
+  while (prompts.find(p => p.id === idToCheck)) {
+    console.warn(`Prompt ID collision for ${idToCheck}. Regenerating ID.`);
+    idToCheck = crypto.randomUUID();
   }
-  prompts.push(prompt);
+  newPrompt.id = idToCheck;
+
+  prompts.push(newPrompt);
   savePrompts(prompts);
+  return newPrompt;
 };
 
-export const updatePrompt = (updatedPrompt: Prompt): void => {
+export const updatePrompt = (updatedPrompt: Prompt): Prompt | null => {
   const prompts = getPrompts();
   const index = prompts.findIndex(prompt => prompt.id === updatedPrompt.id);
   if (index === -1) {
     console.warn(`Prompt with ID ${updatedPrompt.id} not found. Cannot update.`);
-    return;
+    return null;
   }
-  prompts[index] = updatedPrompt;
+  // Preserve createdAt, update updatedAt
+  const existingPrompt = prompts[index];
+  prompts[index] = {
+    ...existingPrompt,
+    ...updatedPrompt,
+    updatedAt: new Date().toISOString(),
+  };
   savePrompts(prompts);
+  return prompts[index];
 };
 
 export const deletePrompt = (promptId: string): void => {
@@ -73,7 +91,13 @@ export const addCategory = (categoryData: { name: string }): Category => {
   if (existingCategory) {
     return existingCategory;
   }
-  const newCategory: Category = { id: crypto.randomUUID(), name: categoryData.name };
+  let id = crypto.randomUUID();
+  // Ensure no duplicate ID, though UUIDs make this unlikely
+  while (categories.find(c => c.id === id)) {
+    console.warn(`Category ID collision for ${id}. Regenerating ID.`);
+    id = crypto.randomUUID();
+  }
+  const newCategory: Category = { id, name: categoryData.name };
   categories.push(newCategory);
   saveCategories(categories);
   return newCategory;
@@ -120,7 +144,7 @@ export const importData = (jsonData: string): { success: boolean; message: strin
     let parsedData;
     try {
       parsedData = JSON.parse(jsonData);
-    } catch (e) {
+    } catch { // Removed unused _e
       return { success: false, message: "Invalid JSON format.", error: "parse_error" };
     }
 
@@ -139,7 +163,8 @@ export const importData = (jsonData: string): { success: boolean; message: strin
     // Optional: Basic structural validation for a few items
     if (parsedData.prompts.length > 0) {
       const firstPrompt = parsedData.prompts[0];
-      if (typeof firstPrompt.id !== 'string' || typeof firstPrompt.name !== 'string' || typeof firstPrompt.content !== 'string') {
+      // Changed firstPrompt.name to firstPrompt.title for correct validation
+      if (typeof firstPrompt.id !== 'string' || typeof firstPrompt.title !== 'string' || typeof firstPrompt.content !== 'string') { 
         return { success: false, message: "Invalid prompt structure in 'prompts' array.", error: "structure_error" };
       }
     }
