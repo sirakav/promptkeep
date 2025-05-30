@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Rocket, DatabaseZap, FileUp, FileDown, Info } from 'lucide-react';
+import { Rocket, DatabaseZap, FileUp, Info } from 'lucide-react';
 
 interface OnboardingModalProps {
   isOpen: boolean;
