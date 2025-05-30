@@ -87,9 +87,21 @@ export const saveCategories = (categories: Category[]): void => {
 // Returns the new category or the existing one if found.
 export const addCategory = (categoryData: Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Category => {
   const categories = getCategories();
+  // Check if a category with the same name already exists (case-insensitive)
+  const existingCategory = categories.find(
+    (cat) => cat.name.toLowerCase() === categoryData.name.toLowerCase()
+  );
+
+  if (existingCategory) {
+    return existingCategory; // Return the existing category if found
+  }
+
+  // If not found, create and add a new one
   let id = crypto.randomUUID();
-  // Ensure unique ID
+  // Ensure unique ID (though collision is highly unlikely with UUIDs)
+  // Add a console warning for ID collision during regeneration for categories as well.
   while (categories.find(cat => cat.id === id)) {
+    console.warn(`Category ID collision for ${id}. Regenerating ID.`);
     id = crypto.randomUUID();
   }
   const newCategory: Category = {

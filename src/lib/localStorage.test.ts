@@ -40,6 +40,9 @@ global.crypto = {
   randomUUID: jest.fn(() => mockUUID),
 };
 
+// Mock console.warn
+let consoleWarnSpy: jest.SpyInstance;
+
 describe('localStorage utilities', () => {
   beforeEach(() => {
     localStorageMock.clear();
@@ -48,6 +51,11 @@ describe('localStorage utilities', () => {
     jest.clearAllMocks(); // This clears call counts etc. for all mocks
     // If using jest.spyOn in some tests, consider jest.restoreAllMocks() as well,
     // but ensure it doesn't interfere with the global mock if it's not restored properly by individual tests.
+    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleWarnSpy.mockRestore();
   });
 
   describe('Prompts', () => {
@@ -161,8 +169,9 @@ describe('localStorage utilities', () => {
   });
 
   describe('Categories', () => {
-    const mockCategory: Category = { id: 'cat1', name: 'Test Category 1' };
-    const mockCategory2: Category = { id: 'cat2', name: 'Test Category 2' };
+    const mockDate = new Date().toISOString();
+    const mockCategory: Category = { id: 'cat1', name: 'Test Category 1', userId: 'temp-user-id', createdAt: mockDate, updatedAt: mockDate };
+    const mockCategory2: Category = { id: 'cat2', name: 'Test Category 2', userId: 'temp-user-id', createdAt: mockDate, updatedAt: mockDate };
 
     describe('getCategories', () => {
       it('should return an empty array if no categories are in localStorage', () => {
@@ -195,26 +204,31 @@ describe('localStorage utilities', () => {
       it('should not add a category if a category with the same name already exists (case-insensitive)', () => {
         localStorageMock.setItem('categories', JSON.stringify([mockCategory]));
         // Pass an object as expected by the addCategory function
-        const result = addCategory({ name: mockCategory.name.toUpperCase() }); 
+        const result = addCategory({ name: mockCategory.name.toUpperCase() });
         // The function is designed to return the *existing* category if found by name
-        expect(result).toEqual(mockCategory); 
+        expect(result).toEqual(mockCategory);
         expect(getCategories()).toHaveLength(1); // Should still be 1
       });
 
        it('should not add a category if ID collision occurs (though unlikely with UUID)', () => {
         // Pre-seed a category with the mockUUID
-        localStorageMock.setItem('categories', JSON.stringify([{ ...mockCategory, id: mockUUID }]));
+        const collidingCategory: Category = {
+          ...mockCategory,
+          id: mockUUID,
+          name: "Colliding Name Cat" // Ensure it's a different name so it doesn't get caught by name check
+        };
+        localStorageMock.setItem('categories', JSON.stringify([collidingCategory]));
         const newCategoryData = { name: 'Another New Category' }; // Pass as object
         // The global mock for crypto.randomUUID already returns mockUUID.
         // If a specific sequence is needed for this test, jest.spyOn below will handle it.
-        
+
         const randomUUIDSpy = jest.spyOn(global.crypto, 'randomUUID')
             .mockImplementationOnce(() => mockUUID) // First attempt collision
             .mockImplementationOnce(() => 'new-unique-cat-id'); // Second attempt unique
 
         const addedCategory = addCategory(newCategoryData); // Use the object here
         expect(addedCategory.id).toBe('new-unique-cat-id');
-        expect(getCategories().find(c => c.id === mockUUID)).toBeTruthy(); 
+        expect(getCategories().find(c => c.id === mockUUID)).toBeTruthy();
         expect(getCategories().find(c => c.id === 'new-unique-cat-id')).toBeTruthy();
         expect(getCategories()).toHaveLength(2);
         randomUUIDSpy.mockRestore();
