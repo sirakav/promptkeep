@@ -12,8 +12,24 @@ module.exports = {
     '^lucide-react$': '<rootDir>/__mocks__/lucide-react.js', // Keep existing
   },
   transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: 'tsconfig.jest.json' }],
-    '^.+\\.(js|jsx)$': 'babel-jest',
+    '^.+\\.(t|j)sx?$': ['@swc/jest', {
+      jsc: {
+        parser: {
+          syntax: 'typescript',
+          tsx: true,
+          decorators: true,
+          dynamicImport: true,
+        },
+        transform: {
+          react: {
+            runtime: 'automatic',
+          },
+        },
+      },
+      module: {
+        type: 'commonjs',
+      }
+    }],
   },
   transformIgnorePatterns: [
     '/node_modules/(?!(@radix-ui|lucide-react)/)', // Ensure Radix UI and lucide-react are transformed
