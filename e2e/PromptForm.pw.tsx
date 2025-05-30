@@ -27,11 +27,11 @@ async function openNewForm(page: Page) {
 
 async function openEditForm(page: Page, promptData: Prompt) {
   await page.goto('/test-prompt-form');
-  // The test page's button 'open-edit-form-button' uses its own hardcoded initial data.
-  // To use specific data for this test, we call window.openDialog directly.
   await page.evaluate((data) => {
     window.resetTestState();
-    window.openDialog(data);
+    if (window.openDialog) {
+      window.openDialog(data);
+    }
   }, promptData);
   await expect(page.getByRole('dialog')).toBeVisible();
 }

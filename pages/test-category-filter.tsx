@@ -20,9 +20,9 @@ interface TestPageProps {
 }
 
 const initialCategories: Category[] = [
-  { id: 'cat1', name: 'Tech' },
-  { id: 'cat2', name: 'Health' },
-  { id: 'cat3', name: 'Travel' },
+  { id: 'cat1', name: 'Tech', userId: 'user1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 'cat2', name: 'Health', userId: 'user1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 'cat3', name: 'Travel', userId: 'user1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
 ];
 
 const CategoryFilterTestPage = () => {

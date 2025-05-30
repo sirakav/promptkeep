@@ -6,13 +6,13 @@ import { Prompt, Category } from '@/types'; // Adjust path as necessary
 declare global {
   interface Window {
     // Callback trackers
-    onCopyCalledWith: string | null;
-    onEditCalledWith: Prompt | null;
-    onDeleteCalledWith: string | null;
+    onCopyCalledWith?: string | null;
+    onEditCalledWith?: Prompt | null;
+    onDeleteCalledWith?: string | null;
     // Utility to reset trackers
     resetTestState: () => void;
     // Utility to set component props for the test
-    setPromptCardProps: (props: TestPromptCardProps) => void;
+    setPromptCardProps?: (props: { prompt: Prompt, category?: import('@/types').Category }) => void;
   }
 }
 

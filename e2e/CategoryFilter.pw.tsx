@@ -2,9 +2,9 @@ import { test, expect, Page } from '@playwright/test';
 import { Category } from '../src/types'; // Adjust path as necessary
 
 const mockCategories: Category[] = [
-  { id: 'cat1', name: 'Tech' },
-  { id: 'cat2', name: 'Health' },
-  { id: 'cat3', name: 'Travel' },
+  { id: 'cat1', name: 'Tech', userId: 'user1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 'cat2', name: 'Health', userId: 'user1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 'cat3', name: 'Travel', userId: 'user1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
 ];
 
 const ALL_CATEGORIES_DEFAULT_LABEL = 'All Items'; // Matches the test page

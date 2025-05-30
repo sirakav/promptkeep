@@ -25,7 +25,9 @@ async function setupCard(page: Page, props: { prompt: Prompt, category?: Categor
   await page.goto('/test-prompt-card');
   // Expose a variable to track callback calls on the page
   await page.evaluate((componentProps) => {
-    window.setPromptCardProps(componentProps);
+    if (window.setPromptCardProps) {
+      window.setPromptCardProps(componentProps);
+    }
   }, props);
 }
 

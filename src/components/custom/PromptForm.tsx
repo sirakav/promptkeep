@@ -59,7 +59,16 @@ export const PromptForm = ({
       alert('Please fill in all fields: Name, Content, and Category.');
       return;
     }
-    onSubmit({ name, content, categoryId: '' /* Placeholder, actual ID resolved in parent */ }, categoryName);
+    onSubmit(
+      { 
+        name, 
+        content, 
+        categoryId: '' /* Placeholder, actual ID resolved in parent */, 
+        userId: 'temp-user-id', // Added temporary userId
+        isPublic: false, // Default to false
+      }, 
+      categoryName
+    );
     // onClose(); // Parent should call onClose after successful submission
   };
 

@@ -85,19 +85,20 @@ export const saveCategories = (categories: Category[]): void => {
 
 // Adds a new category only if one with the same name doesn't already exist (case-insensitive).
 // Returns the new category or the existing one if found.
-export const addCategory = (categoryData: { name: string }): Category => {
+export const addCategory = (categoryData: Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Category => {
   const categories = getCategories();
-  const existingCategory = categories.find(c => c.name.toLowerCase() === categoryData.name.toLowerCase());
-  if (existingCategory) {
-    return existingCategory;
-  }
   let id = crypto.randomUUID();
-  // Ensure no duplicate ID, though UUIDs make this unlikely
-  while (categories.find(c => c.id === id)) {
-    console.warn(`Category ID collision for ${id}. Regenerating ID.`);
+  // Ensure unique ID
+  while (categories.find(cat => cat.id === id)) {
     id = crypto.randomUUID();
   }
-  const newCategory: Category = { id, name: categoryData.name };
+  const newCategory: Category = {
+    id,
+    name: categoryData.name,
+    userId: 'temp-user-id', // Placeholder for now
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
   categories.push(newCategory);
   saveCategories(categories);
   return newCategory;

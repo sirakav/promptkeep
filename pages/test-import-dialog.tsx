@@ -1,16 +1,17 @@
 import React, { useState, useCallback } from 'react';
 import { ImportDataDialog } from '@/components/custom/ImportDataDialog'; // Adjust path
 import { Button } from '@/components/ui/button'; // For a button to open the dialog
+import { Prompt } from '@/types'; // Ensure Prompt is imported
 
 // Expose functions/variables to Playwright via window
 declare global {
   interface Window {
     // Control functions
-    openDialog: () => void;
+    openDialog?: (initialData?: Prompt | null) => void; // Use Prompt type
     closeDialog: () => void; // Should be called by the component's onClose
     // Callback trackers
-    onCloseCalled: boolean;
-    onImportCalledWith: string | null;
+    onCloseCalled?: boolean; // Matched to global.d.ts
+    onImportCalledWith?: string | null; // Matched to global.d.ts
     // Utility to reset trackers
     resetTestState: () => void;
   }

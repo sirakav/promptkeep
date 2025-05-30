@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button'; // For a button to open the dia
 declare global {
   interface Window {
     // Control functions
-    openDialog: (initialData?: Prompt | null) => void;
+    openDialog?: (initialData?: Prompt | null) => void;
     // Callback trackers
-    onCloseCalled: boolean;
-    onSubmitCalledWith: { promptData: Omit<Prompt, 'id' | 'createdAt' | 'updatedAt'>, categoryName: string } | null;
+    onCloseCalled?: boolean;
+    onSubmitCalledWith?: { promptData: Omit<Prompt, 'id' | 'createdAt' | 'updatedAt'>, categoryName: string } | null;
     // Utility to reset trackers
     resetTestState: () => void;
   }
