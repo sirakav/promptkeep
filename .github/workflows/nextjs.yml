@@ -5,10 +5,10 @@
 name: Deploy Next.js site to Pages
 
 on:
-  # Runs on pushes targeting the default branch
   push:
-    branches: ["main"]
-
+    branches: ["main"] # Production deployment
+  pull_request: # Preview deployments for PRs
+    types: [opened, synchronize, reopened] # Trigger on PR events
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -18,11 +18,12 @@ permissions:
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+# Overall concurrency for the workflow.
+# For PRs, cancel in-progress runs for the same PR.
+# For pushes to main, it will use this group but `cancel-in-progress` will be overridden at the job level.
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # Build job
@@ -83,10 +84,14 @@ jobs:
   # Deployment job
   deploy:
     environment:
-      name: github-pages
+      name: github-pages # This will be overwritten for PR previews by actions/deploy-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
+    # Add job-level concurrency for production deployment
+    concurrency:
+      group: ${{ github.event_name == 'push' && 'pages' || format('{0}-{1}', github.workflow, github.event.pull_request.number || github.ref) }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
