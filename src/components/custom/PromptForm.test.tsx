@@ -11,7 +11,114 @@ jest.mock('lucide-react', () => ({
   PlusCircle: () => <svg data-testid="plus-circle-icon" />,
   ChevronsUpDown: () => <svg data-testid="chevrons-up-down-icon" />,
   Check: () => <svg data-testid="check-icon" />,
+  Search: () => <svg data-testid="search-icon" />, // Added Search icon
 }));
+
+// Mock DialogClose to prevent asChild issues in JSDOM
+jest.mock('@/components/ui/dialog', () => {
+  const React = jest.requireActual('react');
+  const originalModule = jest.requireActual('@/components/ui/dialog');
+  return {
+    ...originalModule,
+    DialogClose: React.forwardRef(({ children, asChild, ...props }: any, ref: any) => {
+      if (asChild && React.isValidElement(children)) {
+        // Apply props to the child, similar to what Slot would do.
+        // This helps if the child is our UI Button that can handle these props.
+        return React.cloneElement(children, { ...props, ...children.props, ref });
+      }
+      return (
+        <button {...props} ref={ref} data-testid="mocked-dialog-close">
+          {children}
+        </button>
+      );
+    }),
+  };
+});
+
+// Minimal Popover mock - primarily to ensure content is available.
+jest.mock('@radix-ui/react-popover', () => {
+  const React = jest.requireActual('react');
+  const originalModule = jest.requireActual('@radix-ui/react-popover');
+  return {
+    ...originalModule,
+    Root: ({ children }) => <>{children}</>,
+    Trigger: React.forwardRef(({ children, asChild, ...props }, ref) => {
+      if (asChild && React.isValidElement(children)) {
+        const childProps = children.props as any;
+        return React.cloneElement(children, {
+          ...props,
+          ...childProps,
+          ref,
+          onClick: (e) => {
+            if (props.onClick) props.onClick(e);
+            if (childProps.onClick) childProps.onClick(e);
+          },
+          "data-testid": props['data-testid'] || childProps['data-testid'] || "mock-popover-trigger-child"
+        });
+      }
+      return <button {...props} ref={ref} data-testid="mock-popover-trigger">{children}</button>;
+    }),
+    Content: React.forwardRef(({ children, sideOffset, align, ...props }, ref) => ( // Destructure and omit sideOffset, align
+      <div {...props} ref={ref} data-testid="mock-popover-content">{children}</div>
+    )),
+    Portal: ({ children }) => <>{children}</>,
+  };
+});
+
+// Mock ShadCN UI Command Components directly
+jest.mock('@/components/ui/command', () => {
+  const React = jest.requireActual('react');
+
+  const Command = React.forwardRef(({ children, ...props }: any, ref: any) => <div ref={ref} {...props} data-testid="mock-command-root">{children}</div>);
+  Command.displayName = 'Command';
+
+  const CommandInput = React.forwardRef(({ value, onValueChange, ...props }: any, ref: any) => (
+    <input
+      ref={ref}
+      {...props}
+      value={value || ''} // Ensure value is controlled
+      onChange={(e) => onValueChange && onValueChange(e.target.value)}
+      data-testid="mock-command-input"
+      placeholder={props.placeholder || "Search..."} // Carry over placeholder
+    />
+  ));
+  CommandInput.displayName = 'CommandInput';
+
+  const CommandList = React.forwardRef(({ children, ...props }: any, ref: any) => <div ref={ref} {...props} data-testid="mock-command-list">{children}</div>);
+  CommandList.displayName = 'CommandList';
+
+  const CommandEmpty = React.forwardRef(({ children, ...props }: any, ref: any) => <div ref={ref} {...props} data-testid="mock-command-empty">{children || 'No results'}</div>);
+  CommandEmpty.displayName = 'CommandEmpty';
+
+  const CommandGroup = React.forwardRef(({ children, ...props }: any, ref: any) => <div ref={ref} {...props} data-testid="mock-command-group">{children}</div>);
+  CommandGroup.displayName = 'CommandGroup';
+
+  const CommandItem = React.forwardRef(({ children, onSelect, value, ...props }: any, ref: any) => (
+    <div
+      ref={ref}
+      {...props}
+      onClick={() => onSelect && onSelect(value)} // Simulate selection by calling onSelect with value
+      role="option"
+      data-value={value}
+      data-testid="mock-command-item"
+      tabIndex={0} // Make it focusable for userEvent
+    >
+      {children}
+    </div>
+  ));
+  CommandItem.displayName = 'CommandItem';
+
+  return {
+    __esModule: true,
+    Command,
+    CommandInput,
+    CommandList,
+    CommandEmpty,
+    CommandGroup,
+    CommandItem,
+  };
+});
+
 
 // Mock the localStorage utility functions if needed for specific tests,
 // but PromptForm itself doesn't directly call ls.addCategory for example.
@@ -32,12 +139,17 @@ const mockCategories: Category[] = [
 // New test suite for PromptForm with Combobox
 describe('PromptForm Component with Combobox', () => {
   const onSubmitMock = jest.fn();
-  const onCloseMock = jest.fn(); // Renamed from onCancelMock for clarity with PromptForm props
+  const onCloseMock = jest.fn();
+
+  let alertSpy;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Example if you still need to mock ls.getCategories for some reason, though PromptForm receives categories as prop
-    // (localStorageUtils.getCategories as jest.Mock).mockReturnValue(mockCategories);
+    alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    alertSpy.mockRestore(); // Restore original window.alert
   });
 
   const defaultProps = {
@@ -56,12 +168,19 @@ describe('PromptForm Component with Combobox', () => {
   // Basic render test (optional, but good to have)
   it('renders the form with all fields', () => {
     renderPromptForm();
-    expect(screen.getByLabelText(/name/i)).toBeInTheDocument(); // Name field from PromptForm
+    expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/content/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/category/i)).toBeInTheDocument(); // This is the Label for the Combobox
-    expect(screen.getByRole('button', { name: /create prompt/i })).toBeInTheDocument(); // Or "Save Changes"
+    expect(screen.getByLabelText(/category/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /create prompt/i })).toBeInTheDocument();
+    // With DialogClose mocked to handle asChild, this should now find only one.
     expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
   });
+
+  // Helper to fill common form fields
+  const fillFormFields = async (user, name, content) => {
+    await user.type(screen.getByLabelText(/name/i), name);
+    await user.type(screen.getByLabelText(/content/i), content);
+  };
 
   describe('Category Combobox: Display and Initial Value', () => {
     it('shows placeholder when no initialData is provided', () => {
@@ -129,11 +248,9 @@ describe('PromptForm Component with Combobox', () => {
       renderPromptForm();
       const user = userEvent.setup();
 
-      // Fill out other form fields
-      await user.type(screen.getByLabelText(/name/i), 'Test Prompt Name');
-      await user.type(screen.getByLabelText(/content/i), 'Test Prompt Content');
+      await fillFormFields(user, 'Test Prompt Name', 'Test Prompt Content');
 
-      // Open the category combobox
+      // Click the mock popover trigger (which is now the actual Button from PromptForm due to asChild)
       const categoryComboboxTrigger = screen.getByRole('combobox', { name: /category/i });
       await user.click(categoryComboboxTrigger);
 
@@ -167,19 +284,16 @@ describe('PromptForm Component with Combobox', () => {
       const user = userEvent.setup();
       const newCategoryName = 'My New Custom Category';
 
-      // Fill out other form fields
-      await user.type(screen.getByLabelText(/name/i), 'Another Test Prompt');
-      await user.type(screen.getByLabelText(/content/i), 'Some interesting content');
+      await fillFormFields(user, 'Another Test Prompt', 'Some interesting content');
 
-      // Open the category combobox
+      // Click the mock popover trigger
       const categoryComboboxTrigger = screen.getByRole('combobox', { name: /category/i });
       await user.click(categoryComboboxTrigger);
 
-      // Type the new category name into the search input
       const searchInput = screen.getByPlaceholderText(/search or create category.../i);
       await user.type(searchInput, newCategoryName);
 
-      // Click the "Create new category" button
+      // Click the "Create new category" button that appears in CommandEmpty
       // This button appears in CommandEmpty, its text is "Create "{newCategoryName}""
       const createButton = await screen.findByRole('button', { name: `Create "${newCategoryName}"` });
       await user.click(createButton);
@@ -188,7 +302,13 @@ describe('PromptForm Component with Combobox', () => {
       // The current implementation of PromptForm shows `Create "Category Name"` if not found in `categories` prop,
       // OR the actual name if it matches what's typed. After creation click, it sets `categoryName` directly.
       // So the trigger should reflect the new name.
-      expect(categoryComboboxTrigger).toHaveTextContent(newCategoryName);
+      // The Popover mock makes the trigger a simple button. We check its text if applicable,
+      // but the main verification is that categoryName state is set correctly.
+      // The actual trigger text from PromptForm might be complex to assert with this mock.
+      // Let's focus on the onSubmit call.
+      // The text content of the actual combobox trigger (which is also the mocked PopoverTrigger)
+      // should update based on the categoryName state.
+      expect(screen.getByRole('combobox', { name: /category/i })).toHaveTextContent(newCategoryName);
 
       // Submit the form
       await user.click(screen.getByRole('button', { name: /create prompt/i }));
@@ -209,6 +329,7 @@ describe('PromptForm Component with Combobox', () => {
       renderPromptForm();
       const user = userEvent.setup();
 
+      // Click the mock popover trigger
       const categoryComboboxTrigger = screen.getByRole('combobox', { name: /category/i });
       await user.click(categoryComboboxTrigger);
 
@@ -245,16 +366,18 @@ describe('PromptForm Component with Combobox', () => {
       expect(categoryComboboxTrigger).toHaveTextContent(mockCategories[0].name); // "Category 1"
 
       // Fill out other form fields
-      await user.clear(screen.getByLabelText(/name/i));
-      await user.type(screen.getByLabelText(/name/i), 'Updated Prompt Name');
-      await user.clear(screen.getByLabelText(/content/i));
-      await user.type(screen.getByLabelText(/content/i), 'Updated Prompt Content');
+      const nameInput = screen.getByLabelText(/name/i);
+      await user.clear(nameInput);
+      await user.type(nameInput, 'Updated Prompt Name');
+      const contentInput = screen.getByLabelText(/content/i);
+      await user.clear(contentInput);
+      await user.type(contentInput, 'Updated Prompt Content');
 
-      // Open and change the category
+      // Open and change the category - categoryComboboxTrigger is already defined
       await user.click(categoryComboboxTrigger);
       const categoryOption2 = await screen.findByRole('option', { name: mockCategories[1].name }); // "Category 2"
       await user.click(categoryOption2);
-      expect(categoryComboboxTrigger).toHaveTextContent(mockCategories[1].name);
+      expect(categoryComboboxTrigger).toHaveTextContent(mockCategories[1].name); // Check the actual trigger
 
       // Submit the form (button should say "Save Changes")
       await user.click(screen.getByRole('button', { name: /save changes/i }));
@@ -280,16 +403,17 @@ describe('PromptForm Component with Combobox', () => {
       expect(categoryComboboxTrigger).toHaveTextContent(mockCategories[0].name); // "Category 1"
 
       // Update other fields
-      await user.clear(screen.getByLabelText(/name/i));
-      await user.type(screen.getByLabelText(/name/i), 'Name For New Cat Edit');
+      const nameInput = screen.getByLabelText(/name/i);
+      await user.clear(nameInput);
+      await user.type(nameInput, 'Name For New Cat Edit');
 
-      // Open, type, and create new category
+      // Open, type, and create new category - categoryComboboxTrigger is already defined
       await user.click(categoryComboboxTrigger);
       const searchInput = screen.getByPlaceholderText(/search or create category.../i);
       await user.type(searchInput, brandNewCategoryName);
       const createButton = await screen.findByRole('button', { name: `Create "${brandNewCategoryName}"` });
       await user.click(createButton);
-      expect(categoryComboboxTrigger).toHaveTextContent(brandNewCategoryName);
+      expect(categoryComboboxTrigger).toHaveTextContent(brandNewCategoryName); // Check the actual trigger
 
       // Submit
       await user.click(screen.getByRole('button', { name: /save changes/i }));
