@@ -13,6 +13,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
 // For category selection, we might use a Select or Combobox later.
 // For now, let's use an Input and assume the user types the category name.
 // We'll also need a way to get existing categories for autocomplete/selection in a future iteration.
@@ -35,17 +40,20 @@ export const PromptForm = ({
   const [name, setName] = useState('');
   const [content, setContent] = useState('');
   const [categoryName, setCategoryName] = useState('');
+  const [isCategoryPopoverOpen, setIsCategoryPopoverOpen] = useState(false);
+  const [categorySearchText, setCategorySearchText] = useState('');
   // TODO: Add a datalist or custom combobox for categoryName based on `categories` prop
 
   useEffect(() => {
+    if (isOpen) {
+        setCategorySearchText(''); // Reset search text when dialog opens
+    }
     if (initialData) {
       setName(initialData.name);
       setContent(initialData.content);
-      // Find the category name from initialData.categoryId and categories list
       const currentCategory = categories.find(cat => cat.id === initialData.categoryId);
       setCategoryName(currentCategory ? currentCategory.name : '');
     } else {
-      // Reset form for new prompt
       setName('');
       setContent('');
       setCategoryName('');
@@ -89,21 +97,87 @@ export const PromptForm = ({
 
             {/* Category Field */}
             <div className="flex flex-col gap-1">
-              <Label htmlFor="category" className="text-sm">
+              <Label htmlFor="category-combobox" className="text-sm">
                 Category
               </Label>
-              <Input
-                id="category"
-                value={categoryName}
-                onChange={(e) => setCategoryName(e.target.value)}
-                placeholder="Enter new or existing category"
-                required
-                // list="category-suggestions" // Future enhancement
-              />
-              {/* <datalist id="category-suggestions">
-                {categories.map(cat => <option key={cat.id} value={cat.name} />)}
-              </datalist> */}
-            </div>
+              <Popover open={isCategoryPopoverOpen} onOpenChange={setIsCategoryPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={isCategoryPopoverOpen}
+                    aria-controls="category-combobox-list"
+                    className={cn(
+                      'w-full justify-between text-sm',
+                      !categoryName && 'text-muted-foreground'
+                    )}
+                    id="category-combobox"
+                  >
+                    {categoryName
+                      ? categories.find((cat) => cat.name.toLowerCase() === categoryName.toLowerCase())?.name || `Create "${categoryName}"`
+                      : 'Select or create category...'}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search or create category..."
+                      value={categorySearchText}
+                      onValueChange={setCategorySearchText}
+                    />
+                    <CommandList id="category-combobox-list">
+                      <CommandEmpty>
+                        {categorySearchText.trim() !== '' ? (
+                          <Button
+                            variant="ghost"
+                            size="sm" // Consistent with CommandItem padding
+                            className="w-full justify-start text-left px-2" // Align with CommandItem style
+                            onClick={() => {
+                              const newCategoryName = categorySearchText.trim();
+                              setCategoryName(newCategoryName);
+                              setIsCategoryPopoverOpen(false);
+                              setCategorySearchText('');
+                            }}
+                          >
+                            Create "{categorySearchText.trim()}"
+                          </Button>
+                        ) : (
+                          <div className="p-2 text-sm text-center text-muted-foreground">
+                             Type to search or create a new category.
+                          </div>
+                        )}
+                      </CommandEmpty>
+                      <CommandGroup heading="Suggestions">
+                        {categories
+                          .filter(cat => cat.name.toLowerCase().includes(categorySearchText.toLowerCase().trim()))
+                          .map((cat) => (
+                            <CommandItem
+                              key={cat.id}
+                              value={cat.name}
+                              onSelect={(currentValue) => {
+                                // currentValue is the cat.name (because of value={cat.name})
+                                // It's already in the correct casing.
+                                setCategoryName(cat.name);
+                                setIsCategoryPopoverOpen(false);
+                                setCategorySearchText('');
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  'mr-2 h-4 w-4',
+                                  categoryName.toLowerCase() === cat.name.toLowerCase() ? 'opacity-100' : 'opacity-0'
+                                )}
+                              />
+                              {cat.name}
+                            </CommandItem>
+                          ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+                </div>
 
             {/* Content Field */}
             <div className="flex flex-col gap-1 flex-grow">

@@ -149,6 +149,30 @@ export default function HomePage() {
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); // Sort by newest first
   }, [prompts, categories, selectedCategoryId, searchTerm]);
 
+  const UNCATEGORIZED_ID = '_uncategorized_';
+
+  const groupedPrompts = useMemo(() => {
+    const groups: { [categoryId: string]: Prompt[] } = {};
+
+    filteredPrompts.forEach(prompt => {
+      const categoryExists = prompt.categoryId && categories.find(c => c.id === prompt.categoryId);
+      const categoryIdToUse = categoryExists ? prompt.categoryId : UNCATEGORIZED_ID;
+
+      if (!groups[categoryIdToUse]) {
+        groups[categoryIdToUse] = [];
+      }
+      groups[categoryIdToUse].push(prompt);
+    });
+
+    return Object.entries(groups).sort(([catIdA], [catIdB]) => {
+      if (catIdA === UNCATEGORIZED_ID) return 1; // Uncategorized last
+      if (catIdB === UNCATEGORIZED_ID) return -1;
+      const catA = categories.find(c => c.id === catIdA);
+      const catB = categories.find(c => c.id === catIdB);
+      return (catA?.name ?? 'Unknown Category').localeCompare(catB?.name ?? 'Unknown Category');
+    });
+  }, [filteredPrompts, categories]);
+
 
   // --- Render Logic ---
   return (
@@ -173,26 +197,45 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Prompts Grid / List */}
+      {/* Prompts Section */}
       {filteredPrompts.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"> {/* Increased gap slightly */}
-          {filteredPrompts.map(prompt => {
-            const category = categories.find(c => c.id === prompt.categoryId);
+        <div className="space-y-8"> {/* Container for category sections */}
+          {groupedPrompts.map(([categoryId, promptsInCategory]) => {
+            if (promptsInCategory.length === 0) {
+              return null; // Don't render category if no prompts in it after filtering
+            }
+            const category = categories.find(c => c.id === categoryId);
+            const categoryName = categoryId === UNCATEGORIZED_ID
+              ? 'Uncategorized'
+              : category?.name || 'Unknown Category';
+
             return (
-              <PromptCard
-                key={prompt.id}
-                prompt={prompt}
-                category={category}
-                onCopy={handleCopyPrompt}
-                onEdit={handleEditPrompt}
-                onDelete={() => openConfirmDeleteDialog(prompt.id)}
-              />
+              <section key={categoryId} aria-labelledby={`category-header-${categoryId}`}>
+                <h2
+                  id={`category-header-${categoryId}`}
+                  className="text-2xl font-semibold mb-4 sticky top-0 bg-background py-2 z-10"
+                >
+                  {categoryName}
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {promptsInCategory.map(prompt => (
+                    <PromptCard
+                      key={prompt.id}
+                      prompt={prompt}
+                      // category prop removed
+                      onCopy={handleCopyPrompt}
+                      onEdit={handleEditPrompt}
+                      onDelete={() => openConfirmDeleteDialog(prompt.id)}
+                    />
+                  ))}
+                </div>
+              </section>
             );
           })}
         </div>
       ) : (
-        <div className="text-center py-12"> {/* Increased padding */}
-          <p className="text-xl text-muted-foreground mb-4"> {/* Added margin bottom */}
+        <div className="text-center py-12">
+          <p className="text-xl text-muted-foreground mb-4">
             {prompts.length === 0 ? "No prompts yet. Add your first one!" : "No prompts match your current filters."}
           </p>
           {prompts.length === 0 && ( // Only show button if no prompts exist at all

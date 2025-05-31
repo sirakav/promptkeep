@@ -31,8 +31,6 @@ export const PromptCard = ({ prompt, category, onCopy, onEdit, onDelete }: Promp
         <div className="flex justify-between items-start">
           <div>
             <CardTitle>{prompt.name}</CardTitle>
-            {category && <CardDescription>{category.name}</CardDescription>}
-            {!category && prompt.categoryId && <CardDescription>Category ID: {prompt.categoryId}</CardDescription>}
           </div>
           <div className="flex items-center">
             <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleCopy(); }} aria-label="Copy prompt">
