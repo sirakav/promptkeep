@@ -155,9 +155,8 @@ export const PromptForm = ({
                             <CommandItem
                               key={cat.id}
                               value={cat.name}
-                              onSelect={(currentValue) => {
-                                // currentValue is the cat.name (because of value={cat.name})
-                                // It's already in the correct casing.
+                              onSelect={() => { // currentValue parameter removed
+                                // cat.name is used directly from the outer scope
                                 setCategoryName(cat.name);
                                 setIsCategoryPopoverOpen(false);
                                 setCategorySearchText('');

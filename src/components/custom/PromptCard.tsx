@@ -1,18 +1,17 @@
-import { Prompt, Category } from '@/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Prompt } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Copy, Edit3, Trash2, MoreVertical } from 'lucide-react';
 
 interface PromptCardProps {
   prompt: Prompt;
-  category?: Category; // Optional: if category name needs to be displayed directly
   onCopy: (content: string) => void;
   onEdit: (prompt: Prompt) => void;
   onDelete: (promptId: string) => void;
 }
 
-export const PromptCard = ({ prompt, category, onCopy, onEdit, onDelete }: PromptCardProps) => {
+export const PromptCard = ({ prompt, onCopy, onEdit, onDelete }: PromptCardProps) => {
   const handleCopy = () => {
     onCopy(prompt.content);
   };

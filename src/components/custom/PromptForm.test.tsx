@@ -1,9 +1,9 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { PromptForm } from './PromptForm'; // Adjust path
 import { Category, Prompt } from '../../types'; // Adjust path
-import * as localStorageUtils from '../../lib/localStorage'; // To mock localStorage functions
+// import * as localStorageUtils from '../../lib/localStorage'; // To mock localStorage functions - No longer needed
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
