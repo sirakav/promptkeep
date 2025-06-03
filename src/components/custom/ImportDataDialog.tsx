@@ -66,7 +66,7 @@ export const ImportDataDialog = ({ isOpen, onClose, onImport }: ImportDataDialog
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-2xl">
+      <DialogContent className="md:max-w-xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Import Data</DialogTitle>
           <DialogDescription>

@@ -73,7 +73,7 @@ export const PromptForm = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[50vw] p-6 max-h-[90vh] h-full overflow-y-auto flex flex-col">
+      <DialogContent className="p-6 max-h-[90vh] overflow-y-auto flex flex-col sm:max-w-lg md:max-w-xl">
         <DialogHeader>
           <DialogTitle>{initialData ? 'Edit Prompt' : 'Create New Prompt'}</DialogTitle>
           <DialogDescription>
