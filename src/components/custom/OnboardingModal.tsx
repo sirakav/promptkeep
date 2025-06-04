@@ -18,7 +18,7 @@ interface OnboardingModalProps {
 export const OnboardingModal = ({ isOpen, onClose }: OnboardingModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="md:max-w-2xl overflow-y-auto">
+      <DialogContent className="md:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <Rocket className="mr-2 h-6 w-6 text-primary" />
