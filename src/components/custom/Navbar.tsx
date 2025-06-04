@@ -1,4 +1,9 @@
 'use client';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
+import '@fortawesome/fontawesome-svg-core/styles.css'; // Import the CSS
+import { config } from '@fortawesome/fontawesome-svg-core'; // Import config
+config.autoAddCss = false; // Prevent Font Awesome from adding CSS automatically
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,8 +54,9 @@ export const Navbar = () => {
     <>
       <header className="bg-background border-b">
         <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold text-primary">
-            PromptKeep
+          <div className="text-2xl font-bold text-primary flex items-center"> {/* Added flex and items-center for alignment */}
+            <FontAwesomeIcon icon={faLightbulb} className="h-7 w-7 mr-2" /> {/* Adjusted size (h-7 w-7) and added margin-right (mr-2) */}
+            <span>PromptKeep</span> {/* Optional: Add the text back next to the icon */}
           </div>
           {/* Navigation links or other elements can be added here later */}
           <div>
