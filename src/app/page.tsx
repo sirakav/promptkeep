@@ -179,7 +179,7 @@ export default function HomePage() {
     <div className="space-y-6">
       {/* Header section with controls */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <h1 className="text-3xl font-bold">My Prompts</h1>
+        <h1 className="text-2xl font-bold">My Prompts</h1>
         <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto"> {/* Adjusted for better responsive stacking */}
           <SearchBar
             searchTerm={searchTerm}
